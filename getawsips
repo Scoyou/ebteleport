@@ -2,52 +2,47 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'tty-prompt'
+
+def execute_ssh(bitnami_ip, instance)
+  name = instance[:name]
+  ipaddr = instance[:ipaddr]
+  puts "\n\n~~~ sshing you into #{name} at #{ipaddr} ~~~"
+  puts "use 'echo -en \"\\e[?25h\"' to unhide cursor\n\n"
+
+  bitnami_ssh = "ssh -i ~/.ssh/Bridge_Data_Migration.pem -t bitnami@#{bitnami_ip} "
+  instance_ssh = "\"ssh -i .ssh/Bridge_Data_Migration.pem -t ec2-user@#{ipaddr}\""
+
+  command = bitnami_ssh + instance_ssh
+  exec(command)
+end
+
+def show_env_instances(mapping, environment)
+  prompt = TTY::Prompt.new
+
+  bitnami_ip = environment == 'production' ? '3.139.81.57' : '52.15.231.12'
+
+  prompt.select('Select Instance') do |menu|
+    mapping
+      .flatten
+      .sort_by { |m| m[:name] }.select { |m| m[:environment] == environment }
+      .each { |item| menu.choice "#{item[:name]} - #{item[:ipaddr]}", -> { execute_ssh(bitnami_ip, item) } }
+  end
+end
 
 results = `aws-vault exec bridge-custom-dev -- aws ec2 describe-instances`
 
-mapping = JSON.parse(results)['Reservations'].each_with_index.map do |r, idx|
+mapping = JSON(results)['Reservations'].map do |r|
   r['Instances'].map do |i|
     name = i['Tags'].select { |t| t['Key'] == 'Name' }.first['Value']
     env = name[/Staging/] ? 'staging' : 'production'
     ip = i['PrivateIpAddress']
-    { idx => { environment: env, name: name, ipaddr: ip } }
+    { environment: env, name: name, ipaddr: ip }
   end
 end
 
-mapping = mapping.flatten.reduce({}, :merge).sort_by { |_k, v| v[:name] }
-
-env_selection = ''
-
-while env_selection != 1 && env_selection != 2
-  puts "1) Production\n2) Staging"
-  env_selection = gets.chomp.to_i
+env_prompt = TTY::Prompt.new
+env_prompt.select('Select Environment') do |env_menu|
+  env_menu.choice 'Production', -> { show_env_instances(mapping, 'production') }
+  env_menu.choice ' Staging', -> { show_env_instances(mapping, 'staging') }
 end
-
-environment = env_selection == 1 ? 'production' : 'staging'
-
-bitnami_ip = environment == 'production' ? '3.139.81.57' : '52.15.231.12'
-
-puts 'Option - app - ip address'
-puts '-' * 30
-
-mapping.select { |_k, v| v[:environment] == environment }.each do |item|
-  idx = item[0]
-  app = item[1][:name]
-  addr = item[1][:ipaddr]
-  puts "#{idx} - #{app} - #{addr}"
-end
-
-puts "#{'-' * 30}\nSelection: "
-selection = gets.chomp.to_i
-
-instance = mapping.select { |m| m[0] == selection }.first[1]
-name = instance[:name]
-ipaddr = instance[:ipaddr]
-
-puts "~~~ sshing you into #{name} at #{ipaddr} ~~~"
-
-bitnamissh = "ssh -i ~/.ssh/Bridge_Data_Migration.pem -t bitnami@#{bitnami_ip} "
-envssh = "\"ssh -i .ssh/Bridge_Data_Migration.pem ec2-user@\"#{instance[:ipaddr]}"
-command = bitnamissh + envssh
-
-exec(command)
