@@ -1,9 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'json'
-require 'tty-prompt'
-
 def execute_ssh(bitnami_ip, instance)
   name = instance[:name]
   ipaddr = instance[:ipaddr]
@@ -13,6 +10,8 @@ def execute_ssh(bitnami_ip, instance)
   bitnami_ssh = "ssh -i ~/.ssh/Bridge_Data_Migration.pem -t bitnami@#{bitnami_ip} "
   instance_ssh = "\"ssh -i .ssh/Bridge_Data_Migration.pem -t ec2-user@#{ipaddr}\""
 
+  system "echo 'echo -en \"\\e[?25h\"' | pbcopy"
+  puts 'copied cursor command to clipboard'
   command = bitnami_ssh + instance_ssh
   exec(command)
 end
@@ -28,6 +27,30 @@ def show_env_instances(mapping, environment)
       .sort_by { |m| m[:name] }.select { |m| m[:environment] == environment }
       .each { |item| menu.choice "#{item[:name]} - #{item[:ipaddr]}", -> { execute_ssh(bitnami_ip, item) } }
   end
+end
+
+def installing_missing_gems
+  yield
+rescue LoadError => e
+  gem_name = e.message.split('--').last.strip
+  install_command = "gem install #{gem_name}"
+
+  # install missing gem
+  puts "Probably missing gem: #{gem_name}"
+  print 'Auto-install it? [yN] '
+  gets.strip =~ /y/i or exit(1)
+  system(install_command) or exit(1)
+
+  # retry
+  Gem.clear_paths
+  puts 'Trying again ...'
+  require gem_name
+  retry
+end
+
+installing_missing_gems do
+  require 'tty-prompt'
+  require 'json'
 end
 
 results = `aws-vault exec bridge-custom-dev -- aws ec2 describe-instances`
