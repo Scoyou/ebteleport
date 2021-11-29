@@ -69,10 +69,14 @@ def sub_menu(mapping, env, bitnami_ip, item)
   prompt.select('Make a selection') do |menu|
     vim_key_bindings(prompt)
 
-    menu.choice 'Launch (opens in browser)', lambda {
-      open_in_browser(item[:url])
-      sub_menu(mapping, env, bitnami_ip, item)
-    }
+    if item[:url].nil?
+      menu.choice name: 'Launch (opens in browser)', disabled: '(URL not available for environment)'
+    else
+      menu.choice 'Launch (opens in browser)', lambda {
+        open_in_browser(item[:url])
+        sub_menu(mapping, env, bitnami_ip, item)
+      }
+    end
     menu.choice 'Open SSH Connection', -> { execute_ssh(bitnami_ip, item) }
     menu.choice 'Back', -> { show_env_instances(mapping, env) }
     menu.choice 'Exit', -> { exit }
