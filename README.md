@@ -1,6 +1,6 @@
 # Ebteleport
 This is a CLI tool to SSH into an AWS E2 Instance or open the EB environment for the instance in the browser.
-supports vim style key presses.
+Supports vim style key presses.
 
 For use with [Get Bridge](https://github.com/get-bridge) custom dev EB environments.
 
@@ -18,13 +18,13 @@ Move script to path, IE: ```cp ./ebteleport /usr/local/bin/```
 Run script by typing ```ebteleport```
 
 # Dependencies
-This script assumes you have the AWS EB CLI already installed. If not, see [installation instructions](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html)
+This script assumes you have the AWS EB CLI already installed. If not, see [installation instructions](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html).
 
-It also assumes you have configured your Bridge AWS credentials with [AWS-Vault](https://github.com/99designs/aws-vault)
+It also assumes you have configured your Bridge AWS credentials with [AWS-Vault](https://github.com/99designs/aws-vault).
 
 ebteleport relies on the following gems:
 * [tty-prompt](https://github.com/piotrmurach/tty-prompt)
 * [launchy](https://github.com/copiousfreetime/launchy)
 * [JSON](https://github.com/flori/json)
 
-All required gems will be installed automatically when the script is first ran
+All required gems will be installed automatically when the script is first ran.
