@@ -1,5 +1,5 @@
 # Ebteleport
-This is a CLI tool to SSH into an AWS E2 Instance or open the EB environment for the instance in the browser.
+This is a CLI tool to SSH into an AWS E2 Instance or open the EB dashboard for the instance in the browser.
 Supports vim style key presses.
 
 For use with [Get Bridge](https://github.com/get-bridge) custom dev EB environments.
