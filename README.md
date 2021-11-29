@@ -1,4 +1,4 @@
-# AWS Elastic Beanstalk Tool
+# Ebteleport
 This is a CLI tool to SSH into an AWS E2 Instance or open the EB environment for the instance in the browser
 supports vim style key presses
 
