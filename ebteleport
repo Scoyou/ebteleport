@@ -3,18 +3,10 @@
 
 def vim_key_bindings(prompt)
   prompt.on(:keypress) do |event|
-    if event.value == 'j'
-      prompt.trigger(:keydown)
-    end
-    if event.value == 'k'
-      prompt.trigger(:keyup)
-    end
-    if event.value == 'h'
-      prompt.trigger(:keyleft)
-    end
-    if event.value == 'l'
-      prompt.trigger(:keyright)
-    end
+    prompt.trigger(:keydown) if event.value == 'j'
+    prompt.trigger(:keyup) if event.value == 'k'
+    prompt.trigger(:keyleft) if event.value == 'h'
+    prompt.trigger(:keyright) if event.value == 'l'
   end
 end
 
@@ -48,7 +40,7 @@ def show_env_instances(mapping, environment)
     mapping
       .flatten
       .sort_by { |m| m[:name] }.select { |m| m[:environment] == environment }
-      .each do |item| 
+      .each do |item|
         menu.choice "#{item[:name]} - #{item[:ipaddr]}", -> { sub_menu(mapping, environment, bitnami_ip, item) }
       end
   end
