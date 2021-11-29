@@ -7,7 +7,8 @@ env_prompt = TTY::Prompt.new
     vim_key_bindings(env_prompt)
 
     env_menu.choice 'Production', -> { show_env_instances(mapping, 'production') }
-    env_menu.choice ' Staging', -> { show_env_instances(mapping, 'staging') }
+    env_menu.choice 'Staging', -> { show_env_instances(mapping, 'staging') }
+    env_menu.choice 'Exit', -> { exit }
   end
 end
 
