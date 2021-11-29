@@ -53,7 +53,11 @@ def show_env_instances(mapping, environment)
       .flatten
       .sort_by { |m| m[:name] }.select { |m| m[:environment] == environment }
       .each do |item|
-        menu.choice "#{item[:name]} - #{item[:ipaddr]}", -> { sub_menu(mapping, environment, bitnami_ip, item) }
+        if item[:ipaddr].nil?
+          menu.choice name: item[:name].to_s, disabled: '(Environment unavailable)'
+        else
+          menu.choice "#{item[:name]} - #{item[:ipaddr]}", -> { sub_menu(mapping, environment, bitnami_ip, item) }
+        end
       end
     menu.choice 'Exit', -> { exit }
   end
@@ -100,9 +104,11 @@ installing_missing_gems do
   require 'launchy'
 end
 
-results = `aws-vault exec bridge-custom-dev -- aws ec2 describe-instances`
+def instance_results
+  `aws-vault exec bridge-custom-dev -- aws ec2 describe-instances`
+end
 
-mapping = JSON(results)['Reservations'].map do |r|
+mapping = JSON(instance_results)['Reservations'].map do |r|
   r['Instances'].map do |i|
     name = i['Tags'].select { |t| t['Key'] == 'Name' }.first['Value']
     eid = unless i['Tags'].select { |t| t['Key'] == 'elasticbeanstalk:environment-id' }.empty?
