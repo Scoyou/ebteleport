@@ -13,7 +13,7 @@ cd aws-cli-tool
 Make ebteleport script executable
 ```chmod +x ./ebteleport```
 
-Move script to path, IE: ```cp ./ebteleport /usr/local/bin/```
+Move executable to path, IE: ```cp ./ebteleport /usr/local/bin/```
 
 Run script by typing ```ebteleport```
 
