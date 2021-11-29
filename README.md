@@ -7,8 +7,8 @@ For use with [Get Bridge](https://github.com/get-bridge) custom dev EB environme
 # Usage
 Clone repo
 ```
-git clone git@github.com:Skezey/aws-cli-tool.git
-cd aws-cli-tool
+git clone git@github.com:Skezey/ebteleport.git
+cd ebteleport
 ```
 Make ebteleport script executable
 ```chmod +x ./ebteleport```
