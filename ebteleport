@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 def env_selection(mapping)
-env_prompt = TTY::Prompt.new
+  env_prompt = TTY::Prompt.new
   env_prompt.select('Select Environment') do |env_menu|
     vim_key_bindings(env_prompt)
 
@@ -111,7 +111,9 @@ mapping = JSON(results)['Reservations'].map do |r|
     env = name[/Staging/] ? 'staging' : 'production'
     ip = i['PrivateIpAddress']
     url = if eid
-            "https://us-east-2.console.aws.amazon.com/elasticbeanstalk/home?region=us-east-2#/environment/dashboard?applicationName=#{name}&environmentId=#{eid}"
+            base = 'https://us-east-2.console.aws.amazon.com/elasticbeanstalk/home'
+            params = "region=us-east-2#/environment/dashboard?applicationName=#{name}&environmentId=#{eid}"
+            "#{base}?#{params}"
           end
     {
       environment: env,
