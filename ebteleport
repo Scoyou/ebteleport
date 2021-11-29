@@ -45,7 +45,7 @@ def show_env_instances(mapping, environment)
 
   bitnami_ip = environment == 'production' ? '3.139.81.57' : '52.15.231.12'
 
-  prompt.select('Select Instance') do |menu|
+  prompt.select('Select Instance', per_page: 10) do |menu|
     vim_key_bindings(prompt)
 
     menu.choice 'Back', -> { env_selection(mapping) }
