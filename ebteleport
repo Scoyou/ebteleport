@@ -1,6 +1,21 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+def vim_key_bindings(prompt)
+  prompt.on(:keypress) do |event|
+    if event.value == 'j'
+      prompt.trigger(:keydown)
+    end
+    if event.value == 'k'
+      prompt.trigger(:keyup)
+    end
+  end
+end
+
+def open_in_browser(url)
+  Launchy.open(url)
+end
+
 def execute_ssh(bitnami_ip, instance)
   name = instance[:name]
   ipaddr = instance[:ipaddr]
@@ -22,10 +37,26 @@ def show_env_instances(mapping, environment)
   bitnami_ip = environment == 'production' ? '3.139.81.57' : '52.15.231.12'
 
   prompt.select('Select Instance') do |menu|
+    vim_key_bindings(prompt)
+
     mapping
       .flatten
       .sort_by { |m| m[:name] }.select { |m| m[:environment] == environment }
-      .each { |item| menu.choice "#{item[:name]} - #{item[:ipaddr]}", -> { execute_ssh(bitnami_ip, item) } }
+      .each do |item| 
+        menu.choice "#{item[:name]} - #{item[:ipaddr]}", -> { sub_menu(mapping, environment, bitnami_ip, item) }
+      end
+  end
+end
+
+def sub_menu(mapping, env, bitnami_ip, item)
+  prompt = TTY::Prompt.new
+
+  prompt.select('Make a selection') do |menu|
+    vim_key_bindings(prompt)
+
+    menu.choice 'Launch (opens in browser)', -> { open_in_browser(item[:url]) }
+    menu.choice 'Open SSH Connection', -> { execute_ssh(bitnami_ip, item) }
+    menu.choice 'Back', -> { show_env_instances(mapping, env) }
   end
 end
 
@@ -51,6 +82,7 @@ end
 installing_missing_gems do
   require 'tty-prompt'
   require 'json'
+  require 'launchy'
 end
 
 results = `aws-vault exec bridge-custom-dev -- aws ec2 describe-instances`
@@ -58,14 +90,27 @@ results = `aws-vault exec bridge-custom-dev -- aws ec2 describe-instances`
 mapping = JSON(results)['Reservations'].map do |r|
   r['Instances'].map do |i|
     name = i['Tags'].select { |t| t['Key'] == 'Name' }.first['Value']
+    eid = unless i['Tags'].select { |t| t['Key'] == 'elasticbeanstalk:environment-id' }.empty?
+            i['Tags'].select { |t| t['Key'] == 'elasticbeanstalk:environment-id' }.first['Value']
+          end
     env = name[/Staging/] ? 'staging' : 'production'
     ip = i['PrivateIpAddress']
-    { environment: env, name: name, ipaddr: ip }
+    url = if eid
+            "https://us-east-2.console.aws.amazon.com/elasticbeanstalk/home?region=us-east-2#/environment/dashboard?applicationName=#{name}&environmentId=#{eid}"
+          end
+    {
+      environment: env,
+      name: name,
+      ipaddr: ip,
+      url: url || nil
+    }
   end
 end
 
 env_prompt = TTY::Prompt.new
 env_prompt.select('Select Environment') do |env_menu|
+  vim_key_bindings(env_prompt)
+
   env_menu.choice 'Production', -> { show_env_instances(mapping, 'production') }
   env_menu.choice ' Staging', -> { show_env_instances(mapping, 'staging') }
 end
