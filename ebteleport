@@ -9,6 +9,12 @@ def vim_key_bindings(prompt)
     if event.value == 'k'
       prompt.trigger(:keyup)
     end
+    if event.value == 'h'
+      prompt.trigger(:keyleft)
+    end
+    if event.value == 'l'
+      prompt.trigger(:keyright)
+    end
   end
 end
 
