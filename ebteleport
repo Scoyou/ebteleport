@@ -70,9 +70,9 @@ def sub_menu(mapping, env, bitnami_ip, item)
     vim_key_bindings(prompt)
 
     if item[:url].nil?
-      menu.choice name: 'Launch (opens in browser)', disabled: '(URL not available for environment)'
+      menu.choice name: 'Dashboard (opens in browser)', disabled: '(URL not available for environment)'
     else
-      menu.choice 'Launch (opens in browser)', lambda {
+      menu.choice 'Dashboard (opens in browser)', lambda {
         open_in_browser(item[:url])
         sub_menu(mapping, env, bitnami_ip, item)
       }
