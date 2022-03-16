@@ -135,11 +135,22 @@ mapping = JSON(instance_results)['Reservations'].map do |r|
 end
 
 if ARGV[0]
-  env = ARGV[0].split('-').last.downcase
-  bitnami_ip = env == 'prod' ? '3.139.81.57' : '52.15.231.12'
-  instance = mapping.flatten.select { |m| m[:name].downcase == ARGV[0].downcase && m[:ipaddr] }.first
+  begin
+    ENVIRONMENTS = %w[prod staging].freeze
+    env = ARGV[0].split('-').last.downcase
 
-  execute_ssh(bitnami_ip, instance)
+    unless ENVIRONMENTS.include? env
+      puts 'Please specify an environment'
+      exit
+    end
+
+    bitnami_ip = env == 'prod' ? '3.139.81.57' : '52.15.231.12'
+    instance = mapping.flatten.select { |m| m[:name].downcase == ARGV[0].downcase && m[:ipaddr] }.first
+
+    execute_ssh(bitnami_ip, instance)
+  rescue StandardError => e
+    puts e
+  end
 else
   env_selection(mapping)
 end
