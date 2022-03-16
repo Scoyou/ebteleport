@@ -134,4 +134,12 @@ mapping = JSON(instance_results)['Reservations'].map do |r|
   end
 end
 
-env_selection(mapping)
+if ARGV[0]
+  env = ARGV[0].split('-').last
+  bitnami_ip = env == 'prod' ? '3.139.81.57' : '52.15.231.12'
+  instance = mapping.flatten.select { |m| m[:name].downcase == ARGV[0].downcase && m[:ipaddr] }.first
+
+  execute_ssh(bitnami_ip, instance)
+else
+  env_selection(mapping)
+end
