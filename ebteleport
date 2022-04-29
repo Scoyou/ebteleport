@@ -112,23 +112,23 @@ def instance_results
   `aws-vault exec bridge-custom-dev -- aws ec2 describe-instances`
 end
 
-mapping = JSON(instance_results)['Reservations'].map do |r|
-  r['Instances'].map do |i|
-    name = i['Tags'].select { |t| t['Key'] == 'Name' }.first['Value']
-    eid = unless i['Tags'].select { |t| t['Key'] == 'elasticbeanstalk:environment-id' }.empty?
-            i['Tags'].select { |t| t['Key'] == 'elasticbeanstalk:environment-id' }.first['Value']
-          end
-    env = name[/Staging/] ? 'staging' : 'production'
-    ip = i['PrivateIpAddress']
-    url = if eid
+mapping = JSON(instance_results)['Reservations'].map do |reservation|
+  reservation['Instances'].map do |instance|
+    name = instance['Tags'].select { |tag| tag['Key'] == 'Name' }.first['Value']
+    env_id = unless instance['Tags'].select { |tag| tag['Key'] == 'elasticbeanstalk:environment-id' }.empty?
+               instance['Tags'].select { |tag| tag['Key'] == 'elasticbeanstalk:environment-id' }.first['Value']
+             end
+    environment = name[/Staging/] ? 'staging' : 'production'
+    ip_addr = instance['PrivateIpAddress']
+    url = if env_id
             base = 'https://us-east-2.console.aws.amazon.com/elasticbeanstalk/home'
-            params = "region=us-east-2#/environment/dashboard?applicationName=#{name}&environmentId=#{eid}"
+            params = "region=us-east-2#/environment/dashboard?applicationName=#{name}&environmentId=#{env_id}"
             "#{base}?#{params}"
           end
     {
-      environment: env,
+      environment: environment,
       name: name,
-      ipaddr: ip,
+      ipaddr: ip_addr,
       url: url || nil
     }
   end
