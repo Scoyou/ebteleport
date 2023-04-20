@@ -23,6 +23,14 @@ Use arrow keys or vim's h-j-k-l to navigate CLI menu, press enter to make a sele
 ![image](https://user-images.githubusercontent.com/36577381/143939750-45c3c9c7-a491-4391-a866-368b44c764f8.png)
 ![image](https://user-images.githubusercontent.com/36577381/143939818-61f8bb22-7ae0-4c1f-ad54-bcef649cf485.png)
 
+While hovering over the desired environment, hit "enter" to be brought to a sub menu where you can select to SSH into the env or be brough to the AWS eb dashboard in your browser:
+
+![image](https://user-images.githubusercontent.com/36577381/233450267-10558e83-f69a-4bfa-9076-8ed226b7971c.png)
+
+Alternatively, you can type out the env you want to access as a command line arguement to directly SSH into the ec2 instance without going through the menus:
+```bash
+ebteleport bridge-custom-reports-staging
+```
 
 # Dependencies
 This script assumes you have the AWS EB CLI already installed. If not, see [installation instructions](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html).
